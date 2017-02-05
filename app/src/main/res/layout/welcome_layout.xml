@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_welcome"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+    android:background="@color/background"
+    tools:context="com.lostwatchtheatre.coopyourself.WelcomeActivity">
+    <ImageView
+        android:id="@+id/bannerImage"
+        android:paddingTop="20dp"
+        android:paddingBottom="0dp"
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@drawable/coop_banner_mobile"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <View
+        android:id="@+id/anchor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"/>
+
+    <ImageButton
+        android:id="@+id/beginButton"
+        android:background="@null"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/begin_button_mobile"
+        android:layout_toRightOf="@+id/anchor"
+        android:layout_toEndOf="@+id/anchor"
+        android:layout_above="@+id/anchor"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_centerVertical="true"/>
+
+    <ImageButton
+        android:id="@+id/aboutButton"
+        android:background="@null"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/about_button_mobile"
+        android:layout_toLeftOf="@+id/anchor"
+        android:layout_toStartOf="@+id/anchor"
+        android:layout_above="@+id/anchor"
+        android:layout_marginBottom="30dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_centerVertical="true"/>
+
+    <ImageView
+        android:id="@+id/riannaImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/rianna_mobile_l"
+        android:layout_alignParentBottom="true"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo_mobile"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>
