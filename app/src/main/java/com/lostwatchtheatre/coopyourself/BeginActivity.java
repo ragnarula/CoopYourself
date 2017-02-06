@@ -22,6 +22,7 @@ import java.util.Date;
 public class BeginActivity extends AppCompatActivity {
     String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_IMAGE_PICK = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,17 @@ public class BeginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 dispatchTakePictureIntent();
+            }
+        });
+
+        final ImageButton pickButton = (ImageButton) findViewById(R.id.cameraRollButton);
+
+        pickButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto , REQUEST_IMAGE_PICK);//one can be replaced with any action code
             }
         });
 
@@ -63,8 +75,7 @@ public class BeginActivity extends AppCompatActivity {
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "JPEG_COOP_TMP_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -73,7 +84,7 @@ public class BeginActivity extends AppCompatActivity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
+        mCurrentPhotoPath = image.toString();
         return image;
     }
 
@@ -83,7 +94,13 @@ public class BeginActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == REQUEST_IMAGE_CAPTURE) {
             Log.i("IMAGE", mCurrentPhotoPath);
             Intent coopActivityIntent = new Intent(getApplicationContext(), CoopActivity.class);
-            coopActivityIntent.putExtra("IMAGE_PATH", mCurrentPhotoPath);
+            coopActivityIntent.putExtra("IMAGE_PATH", "file://" + mCurrentPhotoPath);
+            startActivityForResult(coopActivityIntent, 0);
+        } else if(resultCode == RESULT_OK && requestCode == REQUEST_IMAGE_PICK){
+            Uri selectedImage = data.getData();
+            Log.i("IMAGE", selectedImage.toString());
+            Intent coopActivityIntent = new Intent(getApplicationContext(), CoopActivity.class);
+            coopActivityIntent.putExtra("IMAGE_PATH", selectedImage.toString());
             startActivityForResult(coopActivityIntent, 0);
         }
     }

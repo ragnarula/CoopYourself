@@ -1,10 +1,14 @@
 package com.lostwatchtheatre.coopyourself.lib;
 
+import java.util.Random;
+
 /**
  * Created by rag on 05/02/2017.
  */
 
 class CircleArea {
+
+
     private int x;
     private int y;
     private int r;
@@ -13,6 +17,7 @@ class CircleArea {
         this.x = x;
         this.y = y;
         this.r = r;
+
     }
 
     boolean isTouched(int xp, int yp){
@@ -36,4 +41,14 @@ class CircleArea {
     public int getR() {
         return r;
     }
+
+    public void setR(int r) {
+        this.r = r;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+
 }

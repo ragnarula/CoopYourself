@@ -1,6 +1,7 @@
 package com.lostwatchtheatre.coopyourself;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,13 +10,23 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import com.lostwatchtheatre.coopyourself.lib.CircleModel;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Random;
@@ -23,84 +34,33 @@ import java.util.Random;
 //http://stackoverflow.com/questions/17826358/drag-and-move-a-circle-drawn-on-canvas/17830245#17830245
 public class CanvasView extends View {
 
-
-    private static final String TAG = "CirclesDrawingView";
-
-    private static class CircleArea {
-        private int radius;
-        private int centerX;
-        private int centerY;
-        private int spacing;
-
-        CircleArea(int centerX, int centerY, int radius) {
-            this.radius = radius;
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.spacing = (int) Math.floor(radius * 1.5);
-        }
-
-        @Override
-        public String toString() {
-            return "Circle[" + centerX + ", " + centerY + ", " + radius + "]";
-        }
-
-        int getX1(){
-            return centerX - spacing;
-        }
-
-        int getY1(){
-            return centerY;
-        }
-
-        int getX2(){
-            return centerX + spacing;
-        }
-
-        int getY2(){
-            return centerY;
-        }
-
-        int getSpacing(){
-            return spacing;
-        }
-
-        public void move(int x, int y) {
-            centerX += x;
-            centerY += y;
-        }
-
-
-    }
-
-    private static class TouchEvent {
-        int x;
-        int y;
-
-        TouchEvent(int x, int y){
-            this.x = x;
-            this.y = y;
-        }
-    }
-
+    private final ScaleGestureDetector scaleGestureDetector;
+    private String tag = "Canvas View";
     private Bitmap background;
     private Bitmap scaled;
-    private Paint mCirclePaint;
-
-    private final static int RADIUS_LIMIT = 100;
-    private static final int CIRCLES_LIMIT = 3;
-
-
-    private HashSet<CircleArea> mCircles = new HashSet<>(CIRCLES_LIMIT);
-    private SparseArray<CircleArea> mCirclePointer = new SparseArray<>(CIRCLES_LIMIT);
-    private SparseArray<TouchEvent> mTouchEvent = new SparseArray<>();
+    private CircleModel model;
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mCirclePaint = new Paint();
 
-        mCirclePaint.setColor(Color.BLUE);
-        mCirclePaint.setStrokeWidth(40);
-        mCirclePaint.setStyle(Paint.Style.FILL);
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                model.onScale((int) detector.getPreviousSpan(), (int) detector.getCurrentSpan());
+                Log.i(tag, String.format("onScaleEvent %f", detector.getCurrentSpan()));
+                return true;
+            }
+
+            @Override
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
+                return true;
+            }
+
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+
+            }
+        });
     }
 
     @Override
@@ -120,101 +80,34 @@ public class CanvasView extends View {
     protected void onDraw(Canvas canvas){
         super.onDraw(canvas);
         canvas.drawBitmap(scaled, 0, 0, null);
-        for (CircleArea circle : mCircles) {
-            canvas.drawCircle(circle.getX1(), circle.getY1(), circle.radius, mCirclePaint);
-            canvas.drawCircle(circle.getX2(), circle.getY2(), circle.radius, mCirclePaint);
-        }
+        model.onDraw(canvas);
     }
 
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
-        boolean handled = false;
-
-        CircleArea touchedCircle;
-        int xTouch;
-        int yTouch;
-        int pointerId;
+        scaleGestureDetector.onTouchEvent(event);
         int actionIndex = event.getActionIndex();
+        int pointerId = event.getPointerId(actionIndex);
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        Log.i(tag, String.format("onTouchEvent %d %d %d %d", actionIndex, pointerId, x, y));
 
         // get touch event coordinates and make transparent circle from it
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-//                // it's the first pointer, so clear all existing pointers data
-//                clearCirclePointer();
-//
-//                xTouch = (int) event.getX(0);
-//                yTouch = (int) event.getY(0);
-//
-//                // check if we've touched inside some circle
-//                touchedCircle = obtainTouchedCircle(xTouch, yTouch);
-//                mCirclePointer.put(event.getPointerId(0), touchedCircle);
-//                mTouchEvent.put(event.getPointerId(0), new TouchEvent(xTouch, yTouch));
-//
-//                invalidate();
-//                handled = true;
+                model.onTouchDown(pointerId, x, y);
                 break;
-
             case MotionEvent.ACTION_POINTER_DOWN:
-//                Log.w(TAG, "Pointer down");
-//                // It secondary pointers, so obtain their ids and check circles
-//                pointerId = event.getPointerId(actionIndex);
-//
-//                xTouch = (int) event.getX(actionIndex);
-//                yTouch = (int) event.getY(actionIndex);
-//
-//                // check if we've touched inside some circle
-//                touchedCircle = obtainTouchedCircle(xTouch, yTouch);
-//
-//                mCirclePointer.put(pointerId, touchedCircle);
-//                mTouchEvent.put(pointerId, new TouchEvent(xTouch, yTouch));
-//                invalidate();
-//                handled = true;
-                pointerId = event.getPointerId(event.getActionIndex());
-
+                model.onTouchDown(pointerId, x, y);
                 break;
-
             case MotionEvent.ACTION_MOVE:
-//                final int pointerCount = event.getPointerCount();
-//
-//                Log.w(TAG, "Move");
-//
-//                for (actionIndex = 0; actionIndex < pointerCount; actionIndex++) {
-//                    // Some pointer has moved, search it by pointer id
-//                    pointerId = event.getPointerId(actionIndex);
-//                    TouchEvent e = mTouchEvent.get(pointerId);
-//
-//                    xTouch = (int) event.getX(actionIndex);
-//                    yTouch = (int) event.getY(actionIndex);
-//
-//                    touchedCircle = mCirclePointer.get(pointerId);
-//
-//                    if (null != touchedCircle) {
-//                        touchedCircle.move(xTouch - e.x, yTouch - e.y);
-//                    }
-//
-//                    mTouchEvent.put(pointerId, new TouchEvent(xTouch, yTouch));
-//                }
-//                invalidate();
-//                handled = true;
+                model.onMove(pointerId, x, y);
                 break;
-
             case MotionEvent.ACTION_UP:
-//                clearCirclePointer();
-//                invalidate();
-//                handled = true;
+                model.onTouchUp(pointerId, x, y);
                 break;
-
             case MotionEvent.ACTION_POINTER_UP:
-//                // not general pointer was up
-//                pointerId = event.getPointerId(actionIndex);
-//
-//                mCirclePointer.remove(pointerId);
-//                invalidate();
-//                handled = true;
-                break;
-
-            case MotionEvent.ACTION_CANCEL:
-                handled = true;
+                model.onTouchUp(pointerId, x, y);
                 break;
 
             default:
@@ -222,59 +115,21 @@ public class CanvasView extends View {
                 break;
         }
 
-        return super.onTouchEvent(event) || handled;
+        return true;
     }
 
-    private CircleArea obtainTouchedCircle(final int xTouch, final int yTouch) {
-        CircleArea touchedCircle = getTouchedCircle(xTouch, yTouch);
-
-        if (null == touchedCircle) {
-            touchedCircle = new CircleArea(xTouch, yTouch, 50);
-
-            if (mCircles.size() == CIRCLES_LIMIT) {
-                Log.w(TAG, "Clear all circles, size is " + mCircles.size());
-                // remove first circle
-                mCircles.clear();
-            }
-
-            Log.w(TAG, "Added circle " + touchedCircle);
-            mCircles.add(touchedCircle);
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public void setBackground(String bg, Context context) throws IOException {
+        Uri image = Uri.parse(bg);
+        InputStream is = context.getContentResolver().openInputStream(image);
+        background = BitmapFactory.decodeStream(is);
+        if(is != null){
+            is.close();
         }
-
-        return touchedCircle;
-    }
-
-    private CircleArea getTouchedCircle(final int xTouch, final int yTouch) {
-        CircleArea touched = null;
-
-        for (CircleArea circle : mCircles) {
-
-            if ((circle.getX1() - xTouch) * (circle.getX1() - xTouch) + (circle.getY1() - yTouch) * (circle.getY1() - yTouch) <= circle.radius * circle.radius) {
-                touched = circle;
-                break;
-            }
-            if ((circle.getX2() - xTouch) * (circle.getX2() - xTouch) + (circle.getY2() - yTouch) * (circle.getY2() - yTouch) <= circle.radius * circle.radius) {
-                touched = circle;
-                break;
-            }
-        }
-
-        return touched;
-    }
-
-    private void clearCirclePointer() {
-        Log.w(TAG, "clearCirclePointer");
-
-        mCirclePointer.clear();
-    }
-
-    public void setBackground(String bg) {
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        background = BitmapFactory.decodeFile(bg, options);
         try {
-            ExifInterface exif = new ExifInterface(bg);
+            String path = getRealPathFromURI(context, image.normalizeScheme());
+
+            ExifInterface exif = new ExifInterface(path);
             Integer orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
             Matrix matrix = new Matrix();
             Log.i("ROTATION", orientation.toString());
@@ -285,5 +140,22 @@ public class CanvasView extends View {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private String getRealPathFromURI(Context c, Uri contentURI) {
+        String result;
+        Cursor cursor = c.getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
+    public void setModel(CircleModel model) {
+        this.model = model;
     }
 }
