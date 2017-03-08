@@ -20,23 +20,23 @@ class DoubleCircleShape {
     };
 
     private static Random rand = new Random(System.currentTimeMillis());
-    private static int MIN_RADIUS = 50;
-    private static int DEFAULT_SPACING = 100;
+    private static int MIN_RADIUS = 80;
 
-    private CircleArea c1;
-    private CircleArea c2;
+
     private String colour;
-    private int spacing;
-    private int x;
-    private int y;
+
+
+    private Vec2 position;
+    private Vec2 circle1;
+    private Vec2 circle2;
+    private int radius;
 
     DoubleCircleShape (int x, int y){
-        this.x = x;
-        this.y = y;
-        this.spacing = DEFAULT_SPACING;
-        int radius = getRadiusForSpacing(spacing);
-        this.c1 = new CircleArea(x - spacing, y, radius);
-        this.c2 = new CircleArea(x + spacing, y, radius);
+        this.position = new Vec2(x, y);
+        Vec2 offset = new Vec2((int)(MIN_RADIUS * 1.2), 0);
+        this.circle1 = new Vec2(this.position).add(offset);
+        this.circle2 = new Vec2(this.position).subtract(offset);
+        this.radius = MIN_RADIUS;
         this.colour = colours[rand.nextInt(colours.length)];
     }
 
@@ -44,63 +44,65 @@ class DoubleCircleShape {
         this.colour = colours[rand.nextInt(colours.length)];
     }
 
-    private int getRadiusForSpacing(int spacing){
-        return (int) (spacing * 0.8);
-    }
 
     boolean isTouched(int x, int y){
-        //TODO add code to detech touch between circles
-        return c1.isTouched(x, y) || c2.isTouched(x, y);
+        double d1 = new Vec2(circle1).subtract(x, y).length();
+        double d2 = new Vec2(circle2).subtract(x, y).length();
+        return d1 < radius || d2 < radius;
     }
 
 
-
-    CircleArea getC1() {
-        return c1;
+    void move(int dx, int dy){
+        position.add(dx, dy);
+        circle1.add(dx, dy);
+        circle2.add(dx, dy);
     }
 
-    CircleArea getC2() {
-        return c2;
+    public void scale(int dSpan) {
+
+        int factor = (int) (dSpan * 1.2);
+        Vec2 c1Diff = new Vec2(circle1).subtract(position).extend(factor);
+        Vec2 c2Diff = new Vec2(circle2).subtract(position).extend(factor);
+        circle1.add(c1Diff);
+        circle2.add(c2Diff);
+
+        radius += dSpan;
     }
 
-    public int getX() {
-        return x;
+
+    void rotate(float angle){
+//        if(angle > 0){
+            circle1 = new Vec2(position).subtract(circle1).rotate(angle).add(position);
+            Vec2 c1offSet = new Vec2(circle1).subtract(position);
+            c1offSet.extend((int) (radius * 1.2));
+            circle1 = new Vec2(position).add(c1offSet);
+
+            circle2 = new Vec2(position).subtract(circle2).rotate(angle).add(position);
+            Vec2 c2offSet = new Vec2(circle2).subtract(position);
+            c2offSet.extend((int) (radius * 1.2));
+            circle2 = new Vec2(position).add(c2offSet);
+//        }
+
+
     }
 
-    public int getY() {
-        return y;
+    boolean isOutside(int x, int y) {
+        return false;
     }
 
     String getColour() {
         return colour;
     }
 
-    boolean isOutside(int x, int y) {
-        return this.x < 0 || this.x > x || this.y < 0 || this.y > y;
+    public Vec2 getC1() {
+        return circle1;
     }
 
-    public void scale(int dSpan) {
-        int newSpacing = spacing + dSpan;
-        int newR = getRadiusForSpacing(spacing);
-
-        if(newR < MIN_RADIUS && dSpan < 0) return;
-
-        spacing = newSpacing;
-        c1.setR(newR);
-        c1.setX(x - spacing);
-        c2.setR(newR);
-        c2.setX(x + spacing);
-
+    public Vec2 getC2() {
+        return circle2;
     }
 
-    void move(int dx, int dy){
-        x += dx;
-        y += dy;
-        c1.move(dx, dy);
-        c2.move(dx, dy);
-    }
-
-    void rotate(float angle){
-
+    public int getRadius(){
+        return radius;
     }
 }

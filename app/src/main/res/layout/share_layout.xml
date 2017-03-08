@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="@color/background"
+    tools:context="com.lostwatchtheatre.coopyourself.ShareActivity">
+
+    <ImageButton
+        android:id="@+id/tickButton"
+        android:background="@null"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/tick_button_small_mobile"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        />
+
+    <ImageView
+        android:id="@+id/share"
+        app:srcCompat="@drawable/share_text_mobile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="30dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_toLeftOf="@id/tickButton"
+        android:layout_toStartOf="@id/tickButton"/>
+
+    <ImageView
+        android:id="@+id/topLogo"
+        android:paddingTop="20dp"
+        android:paddingBottom="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        app:srcCompat="@drawable/logo_top_mobile"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/tickButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

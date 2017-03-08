@@ -59,11 +59,11 @@
         android:layout_marginBottom="10dp"/>
 
     <ImageButton
-        android:id="@+id/moveButton"
+        android:id="@+id/addButton"
         android:background="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/move_button_mobile"
+        app:srcCompat="@drawable/add_button_mobile"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -80,8 +80,8 @@
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/colour_button_mobile"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/moveButton"
-        android:layout_toEndOf="@+id/moveButton"
+        android:layout_toRightOf="@+id/addButton"
+        android:layout_toEndOf="@+id/addButton"
         android:layout_marginStart="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginEnd="5dp"
@@ -89,11 +89,11 @@
         android:layout_marginBottom="10dp"/>
 
     <ImageButton
-        android:id="@+id/addButton"
+        android:id="@+id/removeButton"
         android:background="@null"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/add_button_mobile"
+        app:srcCompat="@drawable/remove_button_mobile"
         android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/colourButton"
         android:layout_toEndOf="@+id/colourButton"

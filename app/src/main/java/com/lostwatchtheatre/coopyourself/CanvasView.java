@@ -12,6 +12,7 @@ import android.graphics.Path;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
@@ -22,9 +23,12 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.lostwatchtheatre.coopyourself.lib.CircleModel;
+import com.lostwatchtheatre.coopyourself.lib.RotationGestureDetector;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -35,19 +39,28 @@ import java.util.Random;
 public class CanvasView extends View {
 
     private final ScaleGestureDetector scaleGestureDetector;
+    private final RotationGestureDetector rotationGestureDetector;
     private String tag = "Canvas View";
     private Bitmap background;
     private Bitmap scaled;
+    private Bitmap buffer;
     private CircleModel model;
+
+    private Canvas canvas;
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setDrawingCacheEnabled(true);
+
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
+        background = Bitmap.createBitmap(1, 1, conf);
+        canvas = new Canvas(background);
 
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
                 model.onScale((int) detector.getPreviousSpan(), (int) detector.getCurrentSpan());
-                Log.i(tag, String.format("onScaleEvent %f", detector.getCurrentSpan()));
+//                Log.i(tag, String.format("onScaleEvent %f", detector.getCurrentSpan()));
                 return true;
             }
 
@@ -61,6 +74,14 @@ public class CanvasView extends View {
 
             }
         });
+
+        rotationGestureDetector = new RotationGestureDetector(new RotationGestureDetector.RotationListener() {
+            @Override
+            public void onRotate(float deltaAngle) {
+                model.onRotate(deltaAngle);
+//                Log.i(tag, String.format("onRotate %f", deltaAngle));
+            }
+        });
     }
 
     @Override
@@ -68,29 +89,37 @@ public class CanvasView extends View {
         super.onSizeChanged(w, h, oldW, oldH);
         float bgHeight = background.getHeight();
         float bgWidth = background.getWidth();
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
+
 
         if(w < h){
+            buffer = Bitmap.createBitmap(w, (int) (bgHeight * (w / bgWidth)), conf);
             scaled = Bitmap.createScaledBitmap(background, w, (int) (bgHeight * (w / bgWidth)), true);
         } else {
-            scaled = Bitmap.createScaledBitmap(background, (int) (bgWidth * (h / bgHeight)), w, true);
+            buffer = Bitmap.createBitmap((int) (bgWidth * (h / bgHeight)), h, conf);
+            scaled = Bitmap.createScaledBitmap(background, (int) (bgWidth * (h / bgHeight)), h, true);
         }
+
+        canvas = new Canvas(buffer);
     }
 
     @Override
-    protected void onDraw(Canvas canvas){
-        super.onDraw(canvas);
+    protected void onDraw(Canvas c){
+        super.onDraw(c);
         canvas.drawBitmap(scaled, 0, 0, null);
         model.onDraw(canvas);
+        c.drawBitmap(buffer, 0, 0, null);
     }
 
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
+        rotationGestureDetector.onTouch(event);
         int actionIndex = event.getActionIndex();
         int pointerId = event.getPointerId(actionIndex);
         int x = (int) event.getX();
         int y = (int) event.getY();
-        Log.i(tag, String.format("onTouchEvent %d %d %d %d", actionIndex, pointerId, x, y));
+//        Log.i(tag, String.format("onTouchEvent %d %d %d %d", actionIndex, pointerId, x, y));
 
         // get touch event coordinates and make transparent circle from it
         switch (event.getActionMasked()) {
@@ -132,7 +161,7 @@ public class CanvasView extends View {
             ExifInterface exif = new ExifInterface(path);
             Integer orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
             Matrix matrix = new Matrix();
-            Log.i("ROTATION", orientation.toString());
+            Log.d("ROTATION", orientation.toString());
             if(orientation == 3) matrix.postRotate(180);
             else if(orientation == 6) matrix.postRotate(90);
             else if(orientation == 8) matrix.postRotate(270);
@@ -157,5 +186,9 @@ public class CanvasView extends View {
 
     public void setModel(CircleModel model) {
         this.model = model;
+    }
+
+    public Bitmap getScreenBuffer() {
+        return buffer;
     }
 }

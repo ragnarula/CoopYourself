@@ -1,6 +1,0 @@
-# ninja log v5
-1	52	0	CMakeFiles/native-lib.dir/src/main/cpp/events/SetDisplaySizeEvent.cpp.o	26418f21b15f062c
-1	194	0	CMakeFiles/native-lib.dir/src/main/cpp/events/SetBackgroundEvent.cpp.o	b52076126d35655b
-1	1943	0	CMakeFiles/native-lib.dir/src/main/cpp/renderlib/RenderService.cpp.o	ff9b835730d21f68
-1	87	0	CMakeFiles/native-lib.dir/src/main/cpp/NativeImageBuffer.cpp.o	2baa0d85351a296a
-2	762	0	CMakeFiles/native-lib.dir/src/main/cpp/native-lib.cpp.o	98f61987902ca384

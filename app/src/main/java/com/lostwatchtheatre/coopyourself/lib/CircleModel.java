@@ -38,7 +38,8 @@ public class CircleModel {
     }
 
     public void onTouchDown(int pointer, int x, int y) {
-        Log.i(tag, String.format("onTouchDown %d %d %d", pointer, x, y));
+        Log.d(tag, String.format("onTouchDown %d %d %d", pointer, x, y));
+        Log.d(tag, String.format("onTouchDown %d %d %d", pointer, x, y));
         this.pointer = pointer;
         selected = getTouchedCircle(x, y);
         prevX = x;
@@ -46,7 +47,7 @@ public class CircleModel {
     }
 
     public void onTouchUp(int pointer, int x, int y){
-        Log.i(tag, String.format("onTouchUp %d %d %d", pointer, x, y));
+        Log.d(tag, String.format("onTouchUp %d %d %d", pointer, x, y));
         if(selected != null && selected.isTouched(x, y)){
             selected = null;
         }
@@ -60,7 +61,7 @@ public class CircleModel {
         if(selected != null){
             int dx = x - prevX;
             int dy = y - prevY;
-            Log.i(tag, String.format("onMove %d %d %d %d %d", pointer, x, y, dx, dy));
+            Log.d(tag, String.format("onMove %d %d %d %d %d", pointer, x, y, dx, dy));
             prevX = x;
             prevY = y;
             selected.move(dx, dy);
@@ -95,8 +96,8 @@ public class CircleModel {
     public void onDraw(Canvas canvas){
         for(DoubleCircleShape c: circles){
             circlePaint.setColor(Color.parseColor(c.getColour()));
-            canvas.drawCircle(c.getC1().getX(), c.getC1().getY(), c.getC1().getR(), circlePaint);
-            canvas.drawCircle(c.getC2().getX(), c.getC2().getY(), c.getC2().getR(), circlePaint);
+            canvas.drawCircle(c.getC1().getX(), c.getC1().getY(), c.getRadius(), circlePaint);
+            canvas.drawCircle(c.getC2().getX(), c.getC2().getY(), c.getRadius(), circlePaint);
         }
     }
 
@@ -115,6 +116,14 @@ public class CircleModel {
     public void onScale(int prevSpan, int currentSpan) {
         if(selected != null){
             selected.scale(currentSpan - prevSpan);
+            view.invalidate();
+        }
+    }
+
+    public void onRotate(float angle){
+        if(selected != null){
+            Log.d("Model", "Rotate");
+            selected.rotate(angle);
             view.invalidate();
         }
     }

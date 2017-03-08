@@ -34,6 +34,11 @@ public class WelcomeActivity extends AppCompatActivity {
 //        tv.setText(stringFromJNI());
     }
 
+    public void aboutClicked(View view) {
+        Intent intent = new Intent(view.getContext(), AboutActivity.class);
+        startActivity(intent);
+    }
+
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.

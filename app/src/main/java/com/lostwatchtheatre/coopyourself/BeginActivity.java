@@ -74,15 +74,9 @@ public class BeginActivity extends AppCompatActivity {
 
 
     private File createImageFile() throws IOException {
-        // Create an image file name
-        String imageFileName = "JPEG_COOP_TMP_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = DiskImageBuffer.createNew(getApplicationContext());
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.toString();
         return image;
